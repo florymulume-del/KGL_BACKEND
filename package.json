@@ -1,0 +1,15 @@
+{
+  "name": "kgl_backend",
+  "version": "1.0.0",
+  "description": "kgl project",
+  "main": "express-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "flory",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
