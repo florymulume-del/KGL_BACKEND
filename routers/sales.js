@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Sale = require("../modules/sales");
 
-const auth = require("../middlewares/auth");
-const { salesOnly } = require("../middlewares/roles");
+const auth = require("../middleware/auth");
+const { salesOnly } = require("../middleware/roles");
 
 
 // ==============================

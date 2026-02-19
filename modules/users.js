@@ -17,8 +17,10 @@ const userSchema = new mongoose.Schema({
         enum: ["Active", "Inactive"],
         default: "Active"
     },
-    department: String
-}, { timestamps: true });
+    department: String,
+    mustChangePassword: { type: Boolean, default: true },
+},
+ { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
 

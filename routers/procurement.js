@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Procurement = require("../modules/procurement");
 
-const auth = require("../middlewares/auth");
-const { managerOnly } = require("../middlewares/roles");
+const auth = require("../middleware/auth");
+const { managerOnly } = require("../middleware/roles");
 
 
 
@@ -22,27 +22,25 @@ router.post("/", auth, managerOnly, async (req,res)=>{
   }
 });
 
-// READ WITH PAGINATION
-router.get("/", auth, async (req,res)=>{
 
+// READ ALL (No pagination)
+router.get("/", auth, async (req, res) => {
+  try {
+    const data = await Procurement.find().sort({ createdAt: -1 });
 
-  try{
-    const page = parseInt(req.query.page)||1;
-    const limit = parseInt(req.query.limit)||5;
-    const skip = (page-1)*limit;
-    const total = await Procurement.countDocuments();
-    const data = await Procurement.find().sort({createdAt:-1}).skip(skip).limit(limit);
     res.json({
-      success:true,
-      currentPage: page,
-      totalPages: Math.ceil(total/limit),
-      totalRecords: total,
+      success: true,
       data
     });
-  }catch(err){
-    res.status(500).json({success:false,message:err.message});
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 });
+
 
 // UPDATE
 

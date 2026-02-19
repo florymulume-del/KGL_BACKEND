@@ -7,11 +7,16 @@ const salesRoutes = require("./routers/sales");
 const usersRoutes = require("./routers/users");
 const creditSalesRouter = require("./routers/creditsales");
 
+
 const app = express();
+
+
+
+
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
+
 mongoose.connect("mongodb://127.0.0.1:27017/karibu_groceries_db")
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error("MongoDB error:", err));
