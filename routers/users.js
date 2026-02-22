@@ -3,12 +3,10 @@ const router = express.Router();
 const User = require("../modules/users");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const JWT_SECRET = "secret123"; // move to .env later
+const JWT_SECRET = "secret123"; 
 
 const auth = require("../middleware/auth");
 const { managerOnly } = require("../middleware/roles");
-
-
 
 
 /* ================================
@@ -29,7 +27,7 @@ router.get("/", auth, async (req, res) => {
    GET SINGLE USER
    GET /users/:id
 ================================ */
-router.get("/", auth, async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
 
     try {
         const user = await User.findById(req.params.id);
@@ -191,7 +189,7 @@ router.post("/change-password", auth, async (req, res) => {
 
     await User.findByIdAndUpdate(req.user.id, {
       password: hashedPassword,
-      mustChangePassword: true
+      mustChangePassword: false
     })
 
     res.json({ message: "Password changed successfully" });

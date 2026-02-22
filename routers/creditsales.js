@@ -8,6 +8,8 @@ const { salesOnly } = require("../middleware/roles");
 // ==============================
 // CREATE CREDIT SALE
 // ==============================
+
+
 router.post("/", auth, salesOnly, async (req, res) => {
   try {
     const data = await CreditSale.create(req.body);
@@ -108,9 +110,6 @@ router.put("/:id", auth, salesOnly, async (req, res) => {
 // ==============================
 // DELETE CREDIT SALE
 // ==============================
-/**
- * @swagger
- */
 
 
 router.delete("/:id", auth, salesOnly, async (req, res) => {

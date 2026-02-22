@@ -6,18 +6,18 @@ const auth = require("../middleware/auth");
 const { salesOnly } = require("../middleware/roles");
 
 
-// ==============================
-// CREATE SALE
-// ==============================
-// CREATE SALE (Sales Agents only)
+// ==========================================
+// CREATE SALE (Sales Agents Only)
+// ==========================================
 router.post("/", auth, salesOnly, async (req, res) => {
-
   try {
     const data = await Sale.create(req.body);
+
     res.status(201).json({
       success: true,
       data
     });
+
   } catch (err) {
     res.status(400).json({
       success: false,
@@ -26,27 +26,16 @@ router.post("/", auth, salesOnly, async (req, res) => {
   }
 });
 
-// ==============================
-// READ SALES WITH PAGINATION
-// ==============================
-router.get("/", async (req, res) => {
+
+// ==========================================
+// GET ALL SALES
+// ==========================================
+router.get("/", auth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
-    const skip = (page - 1) * limit;
-
-    const total = await Sale.countDocuments();
-
-    const data = await Sale.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    const data = await Sale.find().sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalRecords: total,
       data
     });
 
@@ -58,11 +47,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ==============================
-// GET SINGLE SALE (for edit)
-// ==============================
-router.get("/", auth, async (req, res) => {
 
+// ==========================================
+// GET SINGLE SALE (For Edit)
+// ==========================================
+router.get("/:id", auth, async (req, res) => {
   try {
     const data = await Sale.findById(req.params.id);
 
@@ -86,18 +75,17 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// ==============================
-// UPDATE SALE
-// ==============================
-// UPDATE SALE
-router.put("/:id", auth, salesOnly, async (req, res) => {
 
+// ==========================================
+// UPDATE SALE (Sales Agents Only)
+// ==========================================
+router.put("/:id", auth, salesOnly, async (req, res) => {
   try {
     const updated = await Sale.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
-        returnDocument: "after",
+        new: true,           // return updated document
         runValidators: true
       }
     );
@@ -122,12 +110,11 @@ router.put("/:id", auth, salesOnly, async (req, res) => {
   }
 });
 
-// ==============================
-// DELETE SALE
-// ==============================
-// DELETE SALE
-router.delete("/:id", auth, salesOnly, async (req, res) => {
 
+// ==========================================
+// DELETE SALE (Sales Agents Only)
+// ==========================================
+router.delete("/:id", auth, salesOnly, async (req, res) => {
   try {
     const deleted = await Sale.findByIdAndDelete(req.params.id);
 
@@ -150,5 +137,6 @@ router.delete("/:id", auth, salesOnly, async (req, res) => {
     });
   }
 });
+
 
 module.exports = router;
