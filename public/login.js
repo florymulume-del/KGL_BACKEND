@@ -3,6 +3,7 @@ let loginForm = document.querySelector("#login-form");
 let usernameElement = document.querySelector("#username");
 let passwordElement = document.querySelector("#password");
 const toast = document.querySelector("#toast");
+const API_URL = "https://kgl-backend-4.onrender.com"
 
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -22,7 +23,7 @@ loginForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    const response = await fetch("https://kgl-backend-4.onrender.com", {
+    const response = await fetch(`${API_URL}/users/login`, {
       method: "POST",
 
       headers: {
