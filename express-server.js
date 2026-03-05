@@ -7,7 +7,12 @@ const usersRoutes = require("./routers/users");
 const creditSalesRouter = require("./routers/creditsales");
 const app = express();
 
-app.use(cors());
+// app.use(cors());
+
+app.use(cors({
+  origin: 'https://your-backend.onrender.com',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.json()) 
 
