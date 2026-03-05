@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KGL Groceries  Credit Sales</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1100px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+      }
+
+      button {
+        padding: 6px 12px;
+        margin: 2px;
+        cursor: pointer;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background: #eee;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-box {
+        background: white;
+        padding: 20px;
+        width: 600px;
+        border-radius: 8px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 6px;
+        margin-bottom: 10px;
+      }
+      #errorBox {
+        color: red;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>Credit Sales Management</h2>
+      <button onclick="openModal()">Add Credit Sale</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Produce</th>
+            <th>Type</th>
+            <th>Tonnage</th>
+            <th>Amount Due</th>
+            <th>Buyer</th>
+            <th>NIN</th>
+            <th>location</th>
+            <th>Contact</th>
+            <th>Dispatch</th>
+            <th>Due</th>
+            <th>Sales Agent</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+      <div class="modal-box">
+        <h3 id="modalTitle">Add Credit Sale</h3>
+        <div id="errorBox"></div>
+
+        <form id="form">
+          <input type="hidden" name="id" />
+          <input name="produceName" placeholder="Produce Name" required />
+
+          <select name="produceType" required>
+            <option value="">Select Type</option>
+            <option>Organic</option>
+            <option>Hybrid</option>
+          </select>
+
+          <input
+            type="number"
+            name="tonnage"
+            placeholder="Tonnage"
+            min="1"
+            required
+          />
+
+          <input
+            type="number"
+            name="amountDue"
+            placeholder="Amount Due (UGX)"
+            min="10000"
+            required
+          />
+
+          <input name="buyerName" placeholder="Buyer Name" required />
+
+          <input name="nin" placeholder="NIN" required />
+
+          <input name="location" placeholder="Location" required />
+
+          <input name="contact" placeholder="Phone Number" required />
+
+          <input type="date" name="dispatchDate" required />
+
+          <input type="date" name="dueDate" required />
+
+          <input
+            name="salesAgentName"
+            placeholder="Sales Agent Name"
+            required
+          />
+
+          <button type="submit">Save</button>
+          <button type="button" onclick="closeModal()">Cancel</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const API = "http://localhost:3000/creditsales";
+      const tableBody = document.getElementById("tableBody");
+      const modal = document.getElementById("modal");
+      const form = document.getElementById("form");
+      const errorBox = document.getElementById("errorBox");
+      const modalTitle = document.getElementById("modalTitle");
+      const Authorization = "Bearer " + localStorage.getItem("token");
+
+      // Open modal
+      function openModal(data = null) {
+        modal.style.display = "flex";
+        form.reset();
+        errorBox.innerText = "";
+
+        if (data) {
+          modalTitle.innerText = "Edit Credit Sale";
+          form.id.value = data._id;
+          Object.keys(data).forEach((k) => {
+            if (form[k]) form[k].value = data[k];
+          });
+        } else {
+          modalTitle.innerText = "Add Credit Sale";
+        }
+      }
+
+      // Close modal
+      function closeModal() {
+        modal.style.display = "none";
+      }
+
+      // Submit
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const data = Object.fromEntries(new FormData(form).entries());
+        const id = data.id;
+        delete data.id;
+
+        if (new Date(data.dueDate) <= new Date(data.dispatchDate)) {
+          errorBox.innerText = "Due date must be after dispatch date";
+          return;
+        }
+
+        try {
+          const res = await fetch(id ? `${API}/${id}` : API, {
+            method: id ? "PUT" : "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization,
+            },
+            body: JSON.stringify(data),
+          });
+
+          const result = await res.json();
+          if (!res.ok) {
+            errorBox.innerText = result.message;
+            return;
+          }
+
+          closeModal();
+          loadData();
+        } catch (err) {
+          errorBox.innerText = "Server error";
+        }
+      });
+
+      // Load data
+      async function loadData() {
+        const res = await fetch(API, {
+          headers: { Authorization },
+        });
+
+        const result = await res.json();
+        tableBody.innerHTML = "";
+
+        result.data.forEach((s) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+      <td>${s.produceName}</td>
+      <td>${s.produceType}</td>
+      <td>${s.tonnage}</td>
+      <td>${s.amountDue}</td>
+      <td>${s.buyerName}</td>
+      <td>${s.nin}</td>
+      <td>${s.location}</td>
+      <td>${s.contact}</td>
+      <td>${s.dispatchDate}</td>
+      <td>${s.dueDate}</td>
+      <td>${s.salesAgentName}</td>
+      <td>
+        <button onclick='editSale("${s._id}")'>Edit</button>
+        <button onclick='deleteSale("${s._id}")'>Delete</button>
+      </td>
+    `;
+          tableBody.appendChild(tr);
+        });
+      }
+
+      // Edit
+      async function editSale(id) {
+        const res = await fetch(`${API}/${id}`, {
+          headers: { Authorization },
+        });
+        const result = await res.json();
+        openModal(result.data);
+      }
+
+      // Delete
+      async function deleteSale(id) {
+        if (!confirm("Delete this credit sale?")) return;
+
+        await fetch(`${API}/${id}`, {
+          method: "DELETE",
+          headers: { Authorization },
+        });
+
+        loadData();
+      }
+
+      loadData();
+    </script>
+  </body>
+</html>

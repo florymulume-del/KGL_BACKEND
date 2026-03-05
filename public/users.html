@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff Management</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary: #10b981;
+        --primary-hover: #059669;
+        --primary-light: #d1fae5;
+        --bg-body: #f9fafb;
+        --bg-card: #ffffff;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --success-bg: #d1fae5;
+        --success-text: #065f46;
+        --danger-bg: #fee2e2;
+        --danger-text: #991b1b;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        width: 95%;
+      }
+
+      .page-header {
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 600;
+      }
+
+      .page-header p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        background: var(--bg-card);
+        padding: 1rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+        border: 1px solid var(--border-color);
+        border-bottom: none;
+      }
+
+      .search-wrapper {
+        position: relative;
+      }
+
+      .search-wrapper input {
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        width: 280px;
+        outline: none;
+      }
+
+      .search-wrapper .material-icons-outlined {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+      }
+
+      .btn-green {
+        background-color: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .btn-green:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .table-wrapper {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 0 0 0.5rem 0.5rem;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        background-color: #f9fafb;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      tr:hover {
+        background-color: #f0fdf4;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .user-img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+      }
+
+      .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .badge-success {
+        background: var(--success-bg);
+        color: var(--success-text);
+      }
+
+      .icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        color: var(--text-muted);
+      }
+
+      .icon-btn.delete:hover {
+        color: var(--danger-text);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      #new-user-modal:target {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        width: 100%;
+        max-width: 450px;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+      }
+
+      .btn-outline {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        border: 1px solid var(--border-color);
+        background: white;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <div>
+          <h1>User Management</h1>
+          <p>Managers can handle procurement. Sales Agents can record sales.</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrapper">
+          <span class="material-icons-outlined">search</span>
+          <input type="text" placeholder="Search staff..." />
+        </div>
+        <a href="#new-user-modal" class="btn-green">
+          <span class="material-icons-outlined">person_add</span>
+          Add User
+        </a>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th style="text-align: right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Create / Edit Staff Modal -->
+    <div id="new-user-modal" class="modal-overlay">
+      <div class="modal-box">
+        <h3 style="margin-bottom: 1rem">Staff Details</h3>
+        <form>
+          <input id="fullName" class="form-control" placeholder="Full Name" />
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            placeholder="Email"
+          />
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            placeholder="password"
+          />
+
+          <select id="role" class="form-control">
+            <option>Manager</option>
+            <option>Sales Agent</option>
+            <option>Director</option>
+          </select>
+
+          <select id="status" class="form-control">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+
+          <select id="department" class="form-control">
+            <option value="sales">Sales</option>
+            <option value="procurement">Procurement</option>
+            <option value="IT">IT</option>
+            <option value="operations">Operations</option>
+          </select>
+
+          <input type="hidden" id="action" value="create" />
+          <input type="hidden" id="userID" />
+
+          <div class="modal-actions">
+            <a href="#" class="btn-outline">Cancel</a>
+            <button type="button" id="addUserBtn" class="btn-green">
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!--  Authentication handled by backend (/users/login) -->
+
+    <script>
+      const API_URL = "http://localhost:3000";
+
+      let addUserBtn = document.querySelector("#addUserBtn");
+      let fullNameElement = document.querySelector("#fullName");
+      let emailElement = document.querySelector("#email");
+      let passwordElement = document.querySelector("#password");
+      let roleElement = document.querySelector("#role");
+      let statusElement = document.querySelector("#status");
+      let departmentElement = document.querySelector("#department");
+      let usersTableBody = document.querySelector("#users-table-body");
+      let actionElement = document.querySelector("#action");
+      let userIDElement = document.querySelector("#userID");
+      const Authorization = "Bearer " + localStorage.getItem("token");
+
+      async function getUsers() {
+        let users = await fetch(`${API_URL}/users`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization,
+          },
+        })
+          .then((res) => res.json())
+          .catch(() => []);
+        let html = "";
+        users.forEach((user) => {
+          html += `
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <img class="user-img" src="https://ui-avatars.com/api/?name=${user.fullName}&background=10b981&color=fff">
+                            <div>
+                                <strong>${user.fullName}</strong><br>
+                                <small>${user.email}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.role}</td>
+                    <td>${user.department}</td>
+                    <td><span class="badge badge-success">${user.status}</span></td>
+                    <td style="text-align:right">
+                        <a href="#new-user-modal">
+                            <button onclick="editUser('${user._id}')" class="icon-btn">
+                                <span class="material-icons-outlined">edit</span>
+                            </button>
+                        </a>
+                        <button onclick="deleteUser('${user._id}')" class="icon-btn delete">
+                            <span class="material-icons-outlined">delete</span>
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        usersTableBody.innerHTML = html;
+      }
+
+      getUsers();
+
+      addUserBtn.addEventListener("click", async () => {
+        let user = {
+          fullName: fullNameElement.value,
+          email: emailElement.value,
+          password: passwordElement.value,
+          role: roleElement.value,
+          status: statusElement.value,
+          department: departmentElement.value,
+        };
+
+        if (actionElement.value === "create") {
+          await fetch(`${API_URL}/users`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization,
+            },
+
+            body: JSON.stringify(user),
+          });
+          window.location.href = "users.html";
+        } else {
+          await fetch(`${API_URL}/users/${userIDElement.value}`, {
+            method: "PATCH",
+            // headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization,
+            },
+
+            body: JSON.stringify(user),
+          });
+          window.location.href = "users.html";
+        }
+      });
+
+      function deleteUser(id) {
+        if (!confirm("Delete this staff member?")) return;
+        fetch(`${API_URL}/users/${id}`, {
+          method: "DELETE",
+           headers: {
+            "Content-Type": "application/json",
+            Authorization,
+          },
+        }).then(() => (window.location.href = "users.html"));
+      }
+
+      function editUser(id) {
+        actionElement.value = "edit";
+        userIDElement.value = id;
+        fetch(`${API_URL}/users/${id}`)
+          .then((res) => res.json())
+          .then((user) => {
+            fullNameElement.value = user.fullName;
+            emailElement.value = user.email;
+            roleElement.value = user.role;
+            statusElement.value = user.status;
+            departmentElement.value = user.department;
+          });
+      }
+    </script>
+  </body>
+</html>

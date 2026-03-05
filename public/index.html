@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karibu Grocery Ltd | Secure Login</title>
+
+  <!-- Main Styles -->
+  <link rel="stylesheet" href="index.css" />
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+</head>
+
+<body>
+
+  <div class="page-bg">
+    <div class="login-container">
+
+      <!-- LEFT PANEL -->
+      <div class="login-left">
+        <div class="overlay">
+          <div class="left-content">
+            <img src="images/logo.png" alt="Karibu Grocery" class="logo">
+
+            <h1>Karibu <span>Grocery</span> Ltd</h1>
+
+            <p>
+              Secure staff access for sales, procurement, reporting and
+              role-based system control.
+            </p>
+
+            <div class="features">
+              <div><i class="fa-solid fa-user-shield"></i> Role-Based Access</div>
+              <div><i class="fa-solid fa-chart-line"></i> Real-Time Operations</div>
+              <div><i class="fa-solid fa-lock"></i> Secure Authentication</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="login-right">
+        <div class="login-card">
+
+          <h2>Secure Login</h2>
+          <p class="subtitle">Authorized staff only</p>
+
+          <form id="login-form">
+
+            <div class="form-group">
+              <label>
+                <i class="fa-solid fa-user"></i>
+                Username or Email
+              </label>
+              <input
+                type="text"
+                id="username"
+                placeholder="Enter username or email"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>
+                <i class="fa-solid fa-lock"></i>
+                Password
+              </label>
+
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Enter password"
+                />
+                <i class="fa-solid fa-eye toggle" id="togglePassword"></i>
+              </div>
+            </div>
+
+            <button type="submit" class="login-btn" id="login-btn">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              Login
+            </button>
+
+          </form>
+
+          <p class="footer-text">
+            Accounts are created by the system administrator
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Script -->
+  <script src="login.js"></script>
+</body>
+</html>

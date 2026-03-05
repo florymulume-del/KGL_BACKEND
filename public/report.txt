@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sales Reports & Analytics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="report.css">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h2>KGL Groceries LTD</h2>
+        <div class="role">Wholesale Produce Management System</div>
+    </div>
+    <div>
+        <strong>Bob Director</strong><br>
+        <small>Director · Branch A</small>
+    </div>
+</header>
+
+<div class="container">
+
+    <h3>Sales Reports & Analytics</h3>
+
+    <!-- Summary Cards -->
+    <div class="cards">
+        <div class="card">
+            <small>Total Sales</small>
+            <h2>UGX 4,000,230</h2>
+        </div>
+        <div class="card">
+            <small>Regular Sales</small>
+            <h2>UGX 4,000,046</h2>
+        </div>
+        <div class="card">
+            <small>Credit Sales</small>
+            <h2 style="color:#c0392b;">UGX 184</h2>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts">
+        <div class="card">
+            <h4>Sales by Branch</h4>
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="card">
+            <h4>Sales Distribution</h4>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active">Regular Sales</div>
+        <div class="tab">Credit Sales</div>
+    </div>
+
+    <!-- Regular Sales Table -->
+    <h4>Regular Sales History</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Date/Time</th>
+                <th>Produce</th>
+                <th>Quantity</th>
+                <th>Tonnage</th>
+                <th>Buyer</th>
+                <th>Sales Agent</th>
+                <th>Branch</th>
+                <th>Amount Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Jan 11, 2026 21:08</td>
+                <td>Maize - yellow corn</td>
+                <td>bags</td>
+                <td>2.00 tons</td>
+                <td>Flory</td>
+                <td>John Manager</td>
+                <td>Branch A</td>
+                <td>UGX 46</td>
+            </tr>
+            <tr>
+                <td>Jan 11, 2026 21:42</td>
+                <td>Beans - yellow beans</td>
+                <td>2 bags</td>
+                <td>2.00 tons</td>
+                <td>Lumem</td>
+                <td>Jane Agent</td>
+                <td>Branch A</td>
+                <td>UGX 4,000,000</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Stock Alerts -->
+    <div class="alert">
+        ⚠ Stock Alerts — 1 item(s) out of stock
+    </div>
+
+    <!-- Stock Overview -->
+    <h4>Stock Overview – All Branches</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Produce Name</th>
+                <th>Type</th>
+                <th>Branch</th>
+                <th>Available Stock</th>
+                <th>Price/Ton</th>
+                <th>Dealer</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Maize</td>
+                <td>Yellow corn</td>
+                <td>Branch A</td>
+                <td>0.00 tons</td>
+                <td>UGX 23</td>
+                <td>Aristote</td>
+                <td><span class="badge">Out of Stock</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<script >
+    
+
+const API_SALES = "http://localhost:3000/sales";
+const API_CREDIT = "http://localhost:3000/creditsales";
+const API_PROCUREMENT = "http://localhost:3000/procurement";
+
+const Authorization = "Bearer " + localStorage.getItem("token");
+
+// Elements
+const totalSalesEl = document.querySelector(".cards .card:nth-child(1) h2");
+const regularSalesEl = document.querySelector(".cards .card:nth-child(2) h2");
+const creditSalesEl = document.querySelector(".cards .card:nth-child(3) h2");
+
+const regularTableBody = document.querySelector("table tbody");
+const stockTableBody = document.querySelectorAll("table tbody")[1];
+
+let barChart;
+let pieChart;
+
+// ============================
+// LOAD REPORT DATA
+// ============================
+async function loadReport() {
+  try {
+
+    const [salesRes, creditRes, procurementRes] = await Promise.all([
+      fetch(API_SALES, { headers: { Authorization }}),
+      fetch(API_CREDIT, { headers: { Authorization }}),
+      fetch(API_PROCUREMENT, { headers: { Authorization }})
+    ]);
+
+    const salesData = (await salesRes.json()).data || [];
+    const creditData = (await creditRes.json()).data || [];
+    const procurementData = (await procurementRes.json()).data || [];
+
+    // ============================
+    // CALCULATIONS
+    // ============================
+
+    const totalRegular = salesData.reduce((sum, s) => sum + Number(s.amountPaid || 0), 0);
+    const totalCredit = creditData.reduce((sum, s) => sum + Number(s.amountDue || 0), 0);
+    const totalAll = totalRegular + totalCredit;
+
+    totalSalesEl.innerText = "UGX " + totalAll.toLocaleString();
+    regularSalesEl.innerText = "UGX " + totalRegular.toLocaleString();
+    creditSalesEl.innerText = "UGX " + totalCredit.toLocaleString();
+
+    // ============================
+    // REGULAR SALES TABLE
+    // ============================
+
+    regularTableBody.innerHTML = "";
+
+    salesData.forEach(s => {
+      regularTableBody.innerHTML += `
+        <tr>
+          <td>${s.date} ${s.time}</td>
+          <td>${s.produceName}</td>
+          <td>-</td>
+          <td>${s.tonnage} tons</td>
+          <td>${s.buyerName}</td>
+          <td>${s.salesAgentName}</td>
+          <td>-</td>
+          <td>UGX ${Number(s.amountPaid).toLocaleString()}</td>
+        </tr>
+      `;
+    });
+
+    // ============================
+    // STOCK OVERVIEW
+    // ============================
+
+    stockTableBody.innerHTML = "";
+
+    procurementData.forEach(p => {
+
+      const soldTonnage = salesData
+        .filter(s => s.produceName === p.nameOfProduce)
+        .reduce((sum, s) => sum + Number(s.tonnage || 0), 0);
+
+      const remaining = p.tonnage - soldTonnage;
+
+      stockTableBody.innerHTML += `
+        <tr>
+          <td>${p.nameOfProduce}</td>
+          <td>${p.typeOfProduce}</td>
+          <td>${p.branch}</td>
+          <td>${remaining} kg</td>
+          <td>UGX ${p.sellingPrice.toLocaleString()}</td>
+          <td>${p.dealerName}</td>
+          <td>
+            ${
+              remaining <= 0
+                ? `<span class="badge">Out of Stock</span>`
+                : "Available"
+            }
+          </td>
+        </tr>
+      `;
+    });
+
+    // ============================
+    // CHARTS
+    // ============================
+
+    if (barChart) barChart.destroy();
+    if (pieChart) pieChart.destroy();
+
+    barChart = new Chart(document.getElementById("barChart"), {
+      type: "bar",
+      data: {
+        labels: ["Regular Sales", "Credit Sales"],
+        datasets: [{
+          label: "UGX",
+          data: [totalRegular, totalCredit],
+          backgroundColor: ["#1abc9c", "#f39c12"]
+        }]
+      }
+    });
+
+    pieChart = new Chart(document.getElementById("pieChart"), {
+      type: "pie",
+      data: {
+        labels: ["Regular Sales", "Credit Sales"],
+        datasets: [{
+          data: [totalRegular, totalCredit],
+          backgroundColor: ["#1abc9c", "#f39c12"]
+        }]
+      }
+    });
+
+  } catch (err) {
+    console.log("Error loading report", err);
+  }
+}
+
+loadReport();
+</script>
+
+
+
+</body>
+</html>

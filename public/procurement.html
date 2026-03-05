@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procurement Management</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-light: #d1fae5;
+      --bg-body: #f9fafb;
+      --bg-card: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --success-bg: #d1fae5;
+      --success-text: #065f46;
+      --danger-bg: #fee2e2;
+      --danger-text: #991b1b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      width: 95%;
+    }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .page-header h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+
+    .page-header p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      background: var(--bg-card);
+      padding: 1rem;
+      border-radius: 0.5rem 0.5rem 0 0;
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    .search-wrapper input {
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      width: 280px;
+      outline: none;
+    }
+
+    .search-wrapper .material-icons-outlined {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .btn-green {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-green:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .table-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0 0 0.5rem 0.5rem;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background-color: #f9fafb;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background-color: #f0fdf4;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #new-procurement-modal:target {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .btn-outline {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border-color);
+      background: white;
+      text-decoration: none;
+    }
+
+    .summary-box {
+      background: var(--primary-light);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="page-header">
+      <div>
+        <h1>Procurement Management</h1>
+        <p>Manage all procurement records here.</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrapper">
+        <span class="material-icons-outlined">search</span>
+        <input type="text" id="searchInput" placeholder="Search procurement...">
+      </div>
+      <a href="#new-procurement-modal" class="btn-green">
+        <span class="material-icons-outlined">add_shopping_cart</span>
+        Add Procurement
+      </a>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Tonnage</th>
+            <th>Cost</th>
+            <th>Selling</th>
+            <th>Dealer</th>
+            <th>Contact</th>
+            <th>Branch</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="procurement-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add / Edit Procurement Modal -->
+  <div id="new-procurement-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom:1rem;">Procurement Details</h3>
+      <form id="procurementForm">
+        <input type="text" id="nameOfProduce" class="form-control" placeholder="Produce Name" required>
+        <input type="text" id="typeOfProduce" class="form-control" placeholder="Produce Type" required>
+        <input type="date" id="date" class="form-control" required>
+        <input type="time" id="time" class="form-control" required>
+        <input type="number" id="tonnage" class="form-control" placeholder="Tonnage (kg)" min="100" required>
+        <input type="number" id="cost" class="form-control" placeholder="Cost (UGX)" min="10000" required>
+        <input type="number" id="sellingPrice" class="form-control" placeholder="Selling Price (UGX)" min="10000" required>
+        <input type="text" id="dealerName" class="form-control" placeholder="Dealer Name" required>
+        <input type="text" id="contact" class="form-control" placeholder="+256..." required>
+        <select id="branch" class="form-control" required>
+          <option value="">Select Branch</option>
+          <option value="Maganjo">Maganjo</option>
+          <option value="Matugga">Matugga</option>
+        </select>
+
+        <div class="summary-box">
+          Total Cost: <span id="totalCost">0</span><br>
+          Expected Profit: <span id="profit">0</span>
+        </div>
+
+        <input type="hidden" id="action" value="create">
+        <input type="hidden" id="procurementID">
+
+        <div class="modal-actions">
+          <a href="#" class="btn-outline">Cancel</a>
+          <button type="button" id="saveProcurementBtn" class="btn-green">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://localhost:3000/procurement";
+    const Authorization = "Bearer " + localStorage.getItem("token");
+
+    const tableBody = document.querySelector("#procurement-table-body");
+    const form = document.querySelector("#procurementForm");
+
+    const nameInput = document.querySelector("#nameOfProduce");
+    const typeInput = document.querySelector("#typeOfProduce");
+    const dateInput = document.querySelector("#date");
+    const timeInput = document.querySelector("#time");
+    const tonnageInput = document.querySelector("#tonnage");
+    const costInput = document.querySelector("#cost");
+    const sellingInput = document.querySelector("#sellingPrice");
+    const dealerInput = document.querySelector("#dealerName");
+    const contactInput = document.querySelector("#contact");
+    const branchInput = document.querySelector("#branch");
+
+    const totalCostEl = document.querySelector("#totalCost");
+    const profitEl = document.querySelector("#profit");
+    const actionEl = document.querySelector("#action");
+    const procurementIDEl = document.querySelector("#procurementID");
+
+    // Profit auto-calculation
+    function calculateProfit() {
+      const tonnage = Number(tonnageInput.value) || 0;
+      const cost = Number(costInput.value) || 0;
+      const selling = Number(sellingInput.value) || 0;
+      const totalCost = tonnage * cost;
+      const totalSelling = tonnage * selling;
+      const profit = totalSelling - totalCost;
+      totalCostEl.innerText = totalCost.toLocaleString();
+      profitEl.innerText = profit.toLocaleString();
+    }
+
+    tonnageInput.addEventListener("input", calculateProfit);
+    costInput.addEventListener("input", calculateProfit);
+    sellingInput.addEventListener("input", calculateProfit);
+
+    async function getProcurements() {
+  let result = await fetch(API, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization
+    }
+  }).then(res => res.json());
+
+  let data = result.data || [];
+
+  let html = "";
+  data.forEach(p => {
+    html += `
+      <tr>
+        <td>${p.nameOfProduce}</td>
+        <td>${p.typeOfProduce}</td>
+        <td>${p.tonnage}</td>
+        <td>${p.cost.toLocaleString()}</td>
+        <td>${p.sellingPrice.toLocaleString()}</td>
+        <td>${p.dealerName}</td>
+        <td>${p.contact}</td>
+        <td>${p.branch}</td>
+        <td style="text-align:right">
+          <a href="#new-procurement-modal">
+            <button onclick="editProcurement('${p._id}')" class="icon-btn">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+          </a>
+          <button onclick="deleteProcurement('${p._id}')" class="icon-btn delete">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tableBody.innerHTML = html;
+}
+
+
+    getProcurements();
+
+    document.querySelector("#saveProcurementBtn").addEventListener("click", async () => {
+      const procurement = {
+        nameOfProduce: nameInput.value,
+        typeOfProduce: typeInput.value,
+        date: dateInput.value,
+        time: timeInput.value,
+        tonnage: Number(tonnageInput.value),
+        cost: Number(costInput.value),
+        sellingPrice: Number(sellingInput.value),
+        dealerName: dealerInput.value,
+        contact: contactInput.value,
+        branch: branchInput.value
+      };
+
+      if (actionEl.value === "create") {
+        await fetch(API, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization
+          },
+          body: JSON.stringify(procurement)
+        });
+      } else {
+        await fetch(`${API}/${procurementIDEl.value}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization
+          },
+          body: JSON.stringify(procurement)
+        });
+      }
+
+      window.location.href = "procurement.html";
+    });
+
+    function deleteProcurement(id) {
+      if (!confirm("Delete this procurement record?")) return;
+      fetch(`${API}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization
+        }
+      }).then(() => window.location.href = "procurement.html");
+    }
+
+    function editProcurement(id) {
+      actionEl.value = "edit";
+      procurementIDEl.value = id;
+
+      fetch(`${API}/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization
+        }
+      }).then(res => res.json()).then(p => {
+        nameInput.value = p.nameOfProduce;
+        typeInput.value = p.typeOfProduce;
+        dateInput.value = p.date;
+        timeInput.value = p.time;
+        tonnageInput.value = p.tonnage;
+        costInput.value = p.cost;
+        sellingInput.value = p.sellingPrice;
+        dealerInput.value = p.dealerName;
+        contactInput.value = p.contact;
+        branchInput.value = p.branch;
+        calculateProfit();
+      });
+    }
+  </script>
+
+</body>
+</html>
