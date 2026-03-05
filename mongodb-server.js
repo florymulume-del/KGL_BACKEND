@@ -5,7 +5,9 @@ const URI = process.env.MONGODB_URI
  mongoose.connect(URI)
      .then(() => {
          console.log("connect to mongo db")
-     })
+     }) 
+     createDefaultAdmin()
+
      .catch((err) => {
         console.log(err)
      })

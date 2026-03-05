@@ -8,6 +8,42 @@ const usersRoutes = require("./routers/users");
 const creditSalesRouter = require("./routers/creditsales");
 const app = express();
 
+const bcrypt = require("bcrypt");
+const User = require("./modules/users.js"); // adjust path if needed
+
+async function createDefaultAdmin() {
+  try {
+
+    const adminEmail = "admin@gmail.com";
+
+    const existingAdmin = await User.findOne({ email: adminEmail });
+
+    if (!existingAdmin) {
+
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+
+      const admin = new User({
+        fullName: "System Admin",
+        email: adminEmail,
+        password: hashedPassword,
+        role: "admin",
+        status: "active"
+      });
+
+      await admin.save();
+
+      console.log("✅ Default admin created");
+      console.log("Email: admin@gmail.com");
+      console.log("Password: admin123");
+
+    } else {
+      console.log("ℹ️ Admin already exists");
+    }
+
+  } catch (error) {
+    console.error("Admin creation error:", error);
+  }
+}
 
 // app.use(cors());
 
