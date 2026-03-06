@@ -6,7 +6,7 @@ const auth = require("../middleware/auth");
 const { managerOnly } = require("../middleware/roles");
 const {getAllUsers,getUsersById,createUsers,updateUsers,deleteUsers,} = require("../controllers/users.js"); 
 const{loginUsers} = require("../controllers/login.js"); 
-const{changePwd} = require("../controllers/changepassword.js"); 
+const{changePwd} = require("../controllers/change-password.js"); 
 
 /* ================================
    GET ALL USERS
