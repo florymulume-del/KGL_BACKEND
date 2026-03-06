@@ -8,16 +8,26 @@ const userSchema = new mongoose.Schema({
      },
     username: String,
     password: String,
+    // role: {
+    //     type: String,
+    //     enum: ["Manager", "Sales Agent"],
+    //     default: "Sales Agent"
+    // },
     role: {
-        type: String,
-        enum: ["Manager", "Sales Agent"],
-        default: "Sales Agent"
-    },
+  type: String,
+  enum: ["admin", "manager", "staff"],
+  default: "staff"
+},
+    // status: {
+    //     type: String,
+    //     enum: ["Active", "Inactive"],
+    //     default: "Active"
+    // }
     status: {
-        type: String,
-        enum: ["Active", "Inactive"],
-        default: "Active"
-    },
+  type: String,
+  enum: ["active", "inactive"],
+  default: "active"
+},
     department: String,
     mustChangePassword:
      { 
