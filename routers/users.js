@@ -4,8 +4,9 @@ const User = require("../modules/users");
 const JWT_SECRET = "secret123"; 
 const auth = require("../middleware/auth");
 const { managerOnly } = require("../middleware/roles");
-const {getAllUsers,getUsersById,createUsers,updateUsers,deleteUsers} = require("../controllers/users.js"); 
+const {getAllUsers,getUsersById,createUsers,updateUsers,deleteUsers,} = require("../controllers/users.js"); 
 const{loginUsers} = require("../controllers/login.js"); 
+const{changePwd} = require("../controllers/changepassword.js"); 
 
 /* ================================
    GET ALL USERS
@@ -44,28 +45,6 @@ router.delete("/:id", auth, managerOnly,deleteUsers);
 router.post("/login",loginUsers );
 
 // Change password
-router.post("/change-password", auth, async (req, res) => {
-  try {
-    const { newPassword } = req.body;
-
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    await User.findByIdAndUpdate(req.user.id, {
-      password: hashedPassword,
-      mustChangePassword: false
-    })
-
-    res.json({ message: "Password changed successfully" });
-
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-
+router.post("/change-password",auth,changePwd);
 
 module.exports = router;
