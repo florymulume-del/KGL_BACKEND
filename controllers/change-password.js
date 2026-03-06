@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const  User = require("../modules/users.js");
 const changePwd = async (req, res) => {
   try {
