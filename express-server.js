@@ -36,7 +36,7 @@ async function createDefaultAdmin() {
         fullName: "System Admin",
         email: adminEmail,
         password: hashedPassword,
-        role: "admin",
+        role: "Manager",
         status: "active"
       });
 
