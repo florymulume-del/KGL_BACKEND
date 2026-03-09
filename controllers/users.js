@@ -1,4 +1,5 @@
 const  User = require("../modules/users.js");
+const bcrypt = require("bcryptjs");
 const getAllUsers = async (req, res) => {
 
     try {

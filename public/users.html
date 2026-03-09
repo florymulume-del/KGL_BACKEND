@@ -286,7 +286,7 @@
           <select id="role" class="form-control">
             <option>manager</option>
             <option>Sales Agent</option>
-            <option>admin</option>
+            <option>Director</option>
           </select>
 
           <select id="status" class="form-control">
@@ -305,7 +305,7 @@
           <input type="hidden" id="userID" />
 
           <div class="modal-actions">
-            <a href="#" class="btn-outline">Cancel</a>
+            <a href="users.html" class="btn-outline">Cancel</a>
             <button type="button" id="addUserBtn" class="btn-green">
               Save
             </button>
@@ -317,7 +317,7 @@
     <!--  Authentication handled by backend (/users/login) -->
 
     <script>
-      const API_URL = "https://kgl-backend-4.onrender.com";
+      const API_URL = "http://localhost:3000";
 
       let addUserBtn = document.querySelector("#addUserBtn");
       let fullNameElement = document.querySelector("#fullName");
@@ -369,6 +369,8 @@
                 </tr>`;
         });
         usersTableBody.innerHTML = html;
+        window.location.hash = "";
+   
       }
 
       getUsers();

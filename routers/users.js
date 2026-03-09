@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../modules/users");
+const bcrypt = require("bcryptjs");
 const JWT_SECRET = "secret123"; 
 const auth = require("../middleware/auth");
 const { adminOnly } = require("../middleware/roles");
