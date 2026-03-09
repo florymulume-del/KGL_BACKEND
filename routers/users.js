@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../modules/users");
 const JWT_SECRET = "secret123"; 
 const auth = require("../middleware/auth");
-const { managerOnly } = require("../middleware/roles");
+const { adminOnly } = require("../middleware/roles");
 const {getAllUsers,getUsersById,createUsers,updateUsers,deleteUsers,} = require("../controllers/users.js"); 
 const{loginUsers} = require("../controllers/login.js"); 
 const{changePwd} = require("../controllers/change-password.js"); 
@@ -25,19 +25,19 @@ router.get("/:id", auth,getUsersById);
    CREATE USER
    POST /users
 ================================ */
-router.post("/", auth, managerOnly,createUsers)
+router.post("/", auth, adminOnly,createUsers)
 
 /* ================================
    UPDATE USER
    PATCH /users/:id
 ================================ */
-router.patch("/:id", auth, managerOnly,updateUsers);
+router.patch("/:id", auth, adminOnly,updateUsers);
 
 /* ================================
    DELETE USER
    DELETE /users/:id
 ================================ */
-router.delete("/:id", auth, managerOnly,deleteUsers);
+router.delete("/:id", auth, adminOnly,deleteUsers);
 /* ================================
    LOGIN ROUTE
    POST /users/login
