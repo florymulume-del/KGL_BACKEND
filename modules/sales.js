@@ -7,16 +7,28 @@ const salesSchema = new mongoose.Schema({
     trim: true
   },
 
+  branch: {
+    type: String,
+    required: [true, "Branch is required"],
+    enum: ["Maganjo", "Matugga"]
+  },
+
   tonnage: {
     type: Number,
     required: [true, "Tonnage is required"],
     min: [1, "Tonnage must be at least 1"]
   },
 
+  sellingPrice: {
+    type: Number,
+    required: [true, "Selling price is required"],
+    min: [1000, "Selling price must be at least 1,000 UGX"]
+  },
+
   amountPaid: {
     type: Number,
     required: [true, "Amount Paid is required"],
-    min: [10000, "Amount must be at least 5 digits (10,000 UGX)"]
+    min: [10000, "Amount must be at least 10,000 UGX"]
   },
 
   buyerName: {

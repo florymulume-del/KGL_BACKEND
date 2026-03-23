@@ -2,9 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Make page responsive on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KGL Groceries  Credit Sales</title>
 
+    <!-- Inline script for authentication & role-based access -->
+    <script>
+      const token = localStorage.getItem("token"); // Get saved authentication token
+      const role = localStorage.getItem("userRole"); // Get user role from local storage
+
+      // Redirect to login page if user is not authenticated
+      if (!token) {
+        window.location.href = "index.html";
+      }
+
+      // Only Sales Agents are allowed to access this page
+      if (role !== "Sales Agent") {
+        alert("Access denied. Sales agent only.");
+        window.location.href = "dashboard.html";
+      }
+    </script>
+
+    <!-- Page styling -->
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -25,6 +44,7 @@
         cursor: pointer;
       }
 
+      /* Table styling */
       table {
         width: 100%;
         border-collapse: collapse;
@@ -40,11 +60,12 @@
         background: #eee;
       }
 
+      /* Modal styling */
       .modal {
-        display: none;
+        display: none; /* Hidden by default */
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.4); /* Semi-transparent overlay */
         justify-content: center;
         align-items: center;
       }
@@ -61,6 +82,8 @@
         padding: 6px;
         margin-bottom: 10px;
       }
+
+      /* Error messages */
       #errorBox {
         color: red;
         margin-bottom: 10px;
@@ -70,19 +93,23 @@
 
   <body>
     <div class="container">
+      <!-- Page heading and add button -->
       <h2>Credit Sales Management</h2>
       <button onclick="openModal()">Add Credit Sale</button>
 
+      <!-- Table for displaying credit sales -->
       <table>
         <thead>
           <tr>
             <th>Produce</th>
+            <th>Branch</th>
             <th>Type</th>
             <th>Tonnage</th>
+            <th>Selling Price</th>
             <th>Amount Due</th>
             <th>Buyer</th>
             <th>NIN</th>
-            <th>location</th>
+            <th>Location</th>
             <th>Contact</th>
             <th>Dispatch</th>
             <th>Due</th>
@@ -94,84 +121,82 @@
       </table>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal for adding or editing a credit sale -->
     <div class="modal" id="modal">
       <div class="modal-box">
         <h3 id="modalTitle">Add Credit Sale</h3>
         <div id="errorBox"></div>
 
         <form id="form">
+          <!-- Hidden field to store ID for editing -->
           <input type="hidden" name="id" />
           <input name="produceName" placeholder="Produce Name" required />
+          <select name="branch" required>
+            <option value="">Select Branch</option>
+            <option value="Maganjo">Maganjo</option>
+            <option value="Matugga">Matugga</option>
+          </select>
 
+          <!-- Dropdown to select produce type -->
           <select name="produceType" required>
             <option value="">Select Type</option>
             <option>Organic</option>
             <option>Hybrid</option>
+            <option>Fresh</option>
+            <option>Red</option>
+            <option>Green</option>
           </select>
 
-          <input
-            type="number"
-            name="tonnage"
-            placeholder="Tonnage"
-            min="1"
-            required
-          />
+          <!-- Input fields for tonnage and amount due -->
+          <input type="number" name="tonnage" placeholder="Tonnage" min="100" required />
+           <input type="number" name="sellingPrice" placeholder="Selling Price (UGX)" min="1000" required />
+          <input type="number" name="amountDue" placeholder="Amount Due (UGX)" min="10000" required />
 
-          <input
-            type="number"
-            name="amountDue"
-            placeholder="Amount Due (UGX)"
-            min="10000"
-            required
-          />
-
+          <!-- Buyer information -->
           <input name="buyerName" placeholder="Buyer Name" required />
-
           <input name="nin" placeholder="NIN" required />
-
           <input name="location" placeholder="Location" required />
-
           <input name="contact" placeholder="Phone Number" required />
 
+          <!-- Dates for dispatch and due -->
           <input type="date" name="dispatchDate" required />
-
           <input type="date" name="dueDate" required />
 
-          <input
-            name="salesAgentName"
-            placeholder="Sales Agent Name"
-            required
-          />
+          <!-- Sales agent field -->
+          <input name="salesAgentName" placeholder="Sales Agent Name" required />
 
+          <!-- Form action buttons -->
           <button type="submit">Save</button>
           <button type="button" onclick="closeModal()">Cancel</button>
         </form>
       </div>
     </div>
 
+    <!-- JavaScript for CRUD operations -->
     <script>
-      const API = "https://kgl-backend-4.onrender.com/creditsales";
+      const API = "https://kgl-backend-4.onrender.com/creditsales"; // Backend API endpoint
       const tableBody = document.getElementById("tableBody");
       const modal = document.getElementById("modal");
       const form = document.getElementById("form");
       const errorBox = document.getElementById("errorBox");
       const modalTitle = document.getElementById("modalTitle");
-      const Authorization = "Bearer " + localStorage.getItem("token");
+      const Authorization = "Bearer " + localStorage.getItem("token"); // Auth header
 
-      // Open modal
+      // Open modal: can be used for adding or editing
       function openModal(data = null) {
-        modal.style.display = "flex";
-        form.reset();
+        modal.style.display = "flex"; // Show modal
+        form.reset(); // Clear form
         errorBox.innerText = "";
 
         if (data) {
+          // Editing existing record
           modalTitle.innerText = "Edit Credit Sale";
           form.id.value = data._id;
           Object.keys(data).forEach((k) => {
-            if (form[k]) form[k].value = data[k];
+            if (form[k]) form[k].value = data[k]; // Populate form fields
           });
         } else {
+          // Adding new record
           modalTitle.innerText = "Add Credit Sale";
         }
       }
@@ -181,7 +206,7 @@
         modal.style.display = "none";
       }
 
-      // Submit
+      // Handle form submission
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -189,12 +214,14 @@
         const id = data.id;
         delete data.id;
 
+        // Validate that due date is after dispatch date
         if (new Date(data.dueDate) <= new Date(data.dispatchDate)) {
           errorBox.innerText = "Due date must be after dispatch date";
           return;
         }
 
         try {
+          // POST for new record, PUT for editing
           const res = await fetch(id ? `${API}/${id}` : API, {
             method: id ? "PUT" : "POST",
             headers: {
@@ -205,19 +232,20 @@
           });
 
           const result = await res.json();
+
           if (!res.ok) {
-            errorBox.innerText = result.message;
+            errorBox.innerText = result.message; // Show API error
             return;
           }
 
-          closeModal();
-          loadData();
+          closeModal(); // Close modal on success
+          loadData();   // Refresh table
         } catch (err) {
-          errorBox.innerText = "Server error";
+          errorBox.innerText = "Server error"; // Catch network errors
         }
       });
 
-      // Load data
+      // Load credit sales data from backend and populate table
       async function loadData() {
         const res = await fetch(API, {
           headers: { Authorization },
@@ -226,39 +254,42 @@
         const result = await res.json();
         tableBody.innerHTML = "";
 
+        // Loop through records and create table rows
         result.data.forEach((s) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-      <td>${s.produceName}</td>
-      <td>${s.produceType}</td>
-      <td>${s.tonnage}</td>
-      <td>${s.amountDue}</td>
-      <td>${s.buyerName}</td>
-      <td>${s.nin}</td>
-      <td>${s.location}</td>
-      <td>${s.contact}</td>
-      <td>${s.dispatchDate}</td>
-      <td>${s.dueDate}</td>
-      <td>${s.salesAgentName}</td>
-      <td>
-        <button onclick='editSale("${s._id}")'>Edit</button>
-        <button onclick='deleteSale("${s._id}")'>Delete</button>
-      </td>
-    `;
+            <td>${s.produceName}</td>
+            <td>${s.branch}</td
+            <td>${s.produceType}</td>
+            <td>${s.tonnage}</td>
+            <td>${s.sellingPrice}</td>
+            <td>${s.amountDue}</td>
+            <td>${s.buyerName}</td>
+            <td>${s.nin}</td>
+            <td>${s.location}</td>
+            <td>${s.contact}</td>
+            <td>${s.dispatchDate}</td>
+            <td>${s.dueDate}</td>
+            <td>${s.salesAgentName}</td>
+            <td>
+              <button onclick='editSale("${s._id}")'>Edit</button>
+              <button onclick='deleteSale("${s._id}")'>Delete</button>
+            </td>
+          `;
           tableBody.appendChild(tr);
         });
       }
 
-      // Edit
+      // Edit a specific credit sale
       async function editSale(id) {
         const res = await fetch(`${API}/${id}`, {
           headers: { Authorization },
         });
         const result = await res.json();
-        openModal(result.data);
+        openModal(result.data); // Populate modal with existing data
       }
 
-      // Delete
+      // Delete a specific credit sale
       async function deleteSale(id) {
         if (!confirm("Delete this credit sale?")) return;
 
@@ -267,9 +298,10 @@
           headers: { Authorization },
         });
 
-        loadData();
+        loadData(); // Refresh table after deletion
       }
 
+      // Initial data load when page is ready
       loadData();
     </script>
   </body>

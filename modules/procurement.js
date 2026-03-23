@@ -24,7 +24,7 @@ const procurementSchema = new mongoose.Schema(
     { 
       type: Number, 
       required: true,
-       min: 100 
+       min: 10000
       },
     cost: {
        type: Number,

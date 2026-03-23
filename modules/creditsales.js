@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const creditSaleSchema = new mongoose.Schema({
 
   buyerName: {

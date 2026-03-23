@@ -1,129 +1,157 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Karibu Grocery LDD | Dashboard</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Karibu Grocery LTD | Dashboard</title>
 
-<link rel="stylesheet"
- href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="dashboard.css">
-</head>
+    <!-- External icons and CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
 
-<body>
+  <body>
+    <!-- ================= AUTHENTICATION & PASSWORD PROTECTION ================= -->
+    <script>
+      // Get authentication and password status from localStorage
+      const token = localStorage.getItem("token"); // JWT or session token
+      const mustChangePassword = localStorage.getItem("mustChangePassword"); // Flag to force password change
 
-<!-- AUTH PROTECTION -->
-<script>
-  const token = localStorage.getItem("token");
-  const mustChangePassword = localStorage.getItem("mustChangePassword");
+      // SECURITY: If no token exists, the user is not logged in → redirect to login page
+      if (!token) {
+        window.location.href = "index.html";
+      }
 
-  // No token → back to login
-  if (!token) {
-    window.location.href = "index.html";
-  }
+      // SECURITY: If user is required to change password, force redirect before allowing access to dashboard
+      if (mustChangePassword === "true") {
+        window.location.href = "change_password.html";
+      }
+    </script>
 
-  // If user must change password → force redirect
-  if (mustChangePassword === "true") {
-    window.location.href = "change_password.html";
-  }
-</script>
+    <!-- ================= DASHBOARD LAYOUT ================= -->
+    <div class="dashboard">
 
-
-<div class="dashboard">
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
+      <!-- ================= SIDEBAR NAVIGATION ================= -->
+      <div class="sidebar">
         <h2>Karibu Grocery</h2>
 
+        <!-- Main menu links -->
         <div class="menu">
-            <a href="#" class="active"><i class="fa fa-home"></i> Dashboard</a>
-            <a href="procurement.html"><i class="fa fa-box"></i> Procurement</a>
-            <a href="sales.html"><i class="fa fa-cart-shopping"></i> Sales</a>
-            <a href="creditsales.html"><i class="fa fa-credit-card"></i> Credit Sales</a>
-            <a href="stock.html"><i class="fa fa-box"></i> Stock Sales</a>
-            <a href="reports.html"><i class="fa fa-chart-line"></i> Reports</a>
-            <a href="users.html"><i class="fa-solid fa-users"></i> Users</a>
-            <a href="#"><i class="fa fa-gear"></i> Settings</a>
+          <!-- Active dashboard link -->
+          <a href="#" class="active"><i class="fa fa-home"></i> Dashboard</a>
+
+          <!-- Other functional pages -->
+          <a href="procurement.html">
+            <i class="fa fa-chart-line"></i> Procurement
+          </a>
+          <a href="sales.html">
+            <i class="fa fa-chart-line"></i> Sales
+          </a>
+          <a href="creditsales.html">
+            <i class="fa fa-chart-line"></i> Credit Sales
+          </a>
+          <!-- Stock sales link commented out, may be added later -->
+          <!-- <a href="stock.html"><i class="fa fa-box"></i> Stock Sales</a> -->
+
+          <a href="reports.html">
+            <i class="fa fa-chart-line"></i> Reports
+          </a>
+
+          <a href="users.html">
+            <i class="fa fa-chart-line"></i> Users
+          </a>
+          <a href="#"><i class="fa fa-gear"></i> Settings</a>
         </div>
-    </div>
+      </div>
 
-    <!-- MAIN -->
-    <div class="main">
-
-        <!-- TOP BAR -->
+      <!-- ================= MAIN CONTENT ================= -->
+      <div class="main">
+        <!-- ================= TOP BAR ================= -->
         <div class="topbar">
-            <h3>Welcome, Manager</h3>
-            <button class="logout" id="logout">Logout</button>
+          <!-- Greeting -->
+          <h3>Welcome, Manager</h3>
+
+          <!-- Logout button -->
+          <button class="logout" id="logout">Logout</button>
         </div>
 
-        <!-- STATS -->
+        <!-- ================= DASHBOARD CARDS / STATS ================= -->
         <div class="cards">
-            <div class="card">
-                <h4>Total Products</h4>
-                <span>320</span>
-            </div>
-            <div class="card">
-                <h4>Today Sales</h4>
-                <span>$1,250</span>
-            </div>
-            <div class="card">
-                <h4>Customers</h4>
-                <span>85</span>
-            </div>
-            <div class="card">
-                <h4>Low Stock</h4>
-                <span>12</span>
-            </div>
+          <div class="card">
+            <h4>Total Products</h4>
+            <span>320</span>
+          </div>
+          <div class="card">
+            <h4>Today Sales</h4>
+            <span>$1,250</span>
+          </div>
+          <div class="card">
+            <h4>Customers</h4>
+            <span>85</span>
+          </div>
+          <div class="card">
+            <h4>Low Stock</h4>
+            <span>12</span>
+          </div>
         </div>
 
-        <!-- RECENT SALES -->
+        <!-- ================= RECENT SALES TABLE ================= -->
         <div class="table-box">
-            <h4>Recent Sales</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Rice</td>
-                        <td>5</td>
-                        <td>$50</td>
-                        <td>Today</td>
-                    </tr>
-                    <tr>
-                        <td>Sugar</td>
-                        <td>3</td>
-                        <td>$18</td>
-                        <td>Today</td>
-                    </tr>
-                    <tr>
-                        <td>Cooking Oil</td>
-                        <td>2</td>
-                        <td>$30</td>
-                        <td>Yesterday</td>
-                    </tr>
-                </tbody>
-            </table>
+          <h4>Recent Sales</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Example static rows; in production, these would be dynamically generated from API -->
+              <tr>
+                <td>Rice</td>
+                <td>5</td>
+                <td>$50</td>
+                <td>Today</td>
+              </tr>
+              <tr>
+                <td>Sugar</td>
+                <td>3</td>
+                <td>$18</td>
+                <td>Today</td>
+              </tr>
+              <tr>
+                <td>Cooking Oil</td>
+                <td>2</td>
+                <td>$30</td>
+                <td>Yesterday</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
+      </div>
     </div>
-</div>
 
-<script>
-let logoutElement = document.querySelector("#logout");
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+      // Get the user's role if needed for role-based functionality
+      const role = localStorage.getItem("userRole");
 
-logoutElement.addEventListener("click", () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("mustChangePassword");
-    localStorage.removeItem("userRole");
-    window.location.href = "index.html";
-});
-</script>
+      // Logout functionality
+      let logoutElement = document.querySelector("#logout");
+      logoutElement.addEventListener("click", () => {
+        // SECURITY: Clear all authentication data on logout
+        localStorage.removeItem("token");
+        localStorage.removeItem("mustChangePassword");
+        localStorage.removeItem("userRole");
 
-</body>
+        // Redirect to login page after logout
+        window.location.href = "index.html";
+      });
+    </script>
+  </body>
 </html>

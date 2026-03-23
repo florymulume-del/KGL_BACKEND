@@ -2,19 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Ensure proper scaling on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Staff Management</title>
 
+    <!-- Import Google Fonts for consistent typography -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
+    <!-- Import Material Icons for buttons/icons -->
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
       rel="stylesheet"
     />
 
+    <!-- Inline script to handle authentication and authorization -->
+    <script>
+      // Retrieve token and user role from local storage
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("userRole");
+
+      // Redirect to login page if not authenticated
+      if (!token) {
+        window.location.href = "index.html";
+      }
+
+      // Only allow "Director" role to access this page
+      if (role !== "Director") {
+        alert("Access denied. Directors only.");
+        window.location.href = "dashboard.html";
+      }
+    </script>
+
+    <!-- Inline CSS for page styling -->
     <style>
+      /* Root variables for consistent colors and styling */
       :root {
         --primary: #10b981;
         --primary-hover: #059669;
@@ -30,6 +53,7 @@
         --danger-text: #991b1b;
       }
 
+      /* Reset and base styles */
       * {
         margin: 0;
         padding: 0;
@@ -43,12 +67,14 @@
         min-height: 100vh;
       }
 
+      /* Container for page content */
       .container {
         max-width: 1200px;
         margin: 2rem auto;
         width: 95%;
       }
 
+      /* Page header with title and description */
       .page-header {
         margin-bottom: 1.5rem;
         display: flex;
@@ -66,6 +92,7 @@
         color: var(--text-muted);
       }
 
+      /* Toolbar for search and add button */
       .toolbar {
         display: flex;
         justify-content: space-between;
@@ -76,6 +103,7 @@
         border-bottom: none;
       }
 
+      /* Search input styling */
       .search-wrapper {
         position: relative;
       }
@@ -88,6 +116,7 @@
         outline: none;
       }
 
+      /* Icon inside search input */
       .search-wrapper .material-icons-outlined {
         position: absolute;
         left: 0.75rem;
@@ -96,6 +125,7 @@
         color: var(--text-muted);
       }
 
+      /* Green button styling (Add User) */
       .btn-green {
         background-color: var(--primary);
         color: white;
@@ -113,6 +143,7 @@
         background-color: var(--primary-hover);
       }
 
+      /* Table wrapper styling */
       .table-wrapper {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -120,6 +151,7 @@
         overflow-x: auto;
       }
 
+      /* Table styles */
       table {
         width: 100%;
         border-collapse: collapse;
@@ -144,6 +176,7 @@
         background-color: #f0fdf4;
       }
 
+      /* User info in table row */
       .user-info {
         display: flex;
         align-items: center;
@@ -156,6 +189,7 @@
         border-radius: 50%;
       }
 
+      /* Badge for status */
       .badge {
         padding: 0.25rem 0.75rem;
         border-radius: 9999px;
@@ -168,6 +202,7 @@
         color: var(--success-text);
       }
 
+      /* Icon buttons (edit/delete) */
       .icon-btn {
         background: none;
         border: none;
@@ -180,6 +215,7 @@
         color: var(--danger-text);
       }
 
+      /* Modal overlay */
       .modal-overlay {
         position: fixed;
         inset: 0;
@@ -191,11 +227,13 @@
         visibility: hidden;
       }
 
+      /* Show modal when targeted */
       #new-user-modal:target {
         opacity: 1;
         visibility: visible;
       }
 
+      /* Modal box styling */
       .modal-box {
         background: white;
         padding: 2rem;
@@ -204,6 +242,7 @@
         max-width: 450px;
       }
 
+      /* Form controls */
       .form-control {
         width: 100%;
         padding: 0.6rem;
@@ -212,6 +251,7 @@
         margin-bottom: 1rem;
       }
 
+      /* Modal action buttons */
       .modal-actions {
         display: flex;
         justify-content: flex-end;
@@ -229,14 +269,17 @@
   </head>
 
   <body>
+    <!-- Main container -->
     <div class="container">
+      <!-- Page header -->
       <div class="page-header">
         <div>
           <h1>User Management</h1>
-          <p>Managers can handle procurement. Sales Agents can record sales.</p>
+          <p>Directors only can manager users</p>
         </div>
       </div>
 
+      <!-- Toolbar with search and add user button -->
       <div class="toolbar">
         <div class="search-wrapper">
           <span class="material-icons-outlined">search</span>
@@ -248,6 +291,7 @@
         </a>
       </div>
 
+      <!-- Users table -->
       <div class="table-wrapper">
         <table>
           <thead>
@@ -259,34 +303,26 @@
               <th style="text-align: right">Actions</th>
             </tr>
           </thead>
+          <!-- Table body will be populated dynamically -->
           <tbody id="users-table-body"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- Create / Edit Staff Modal -->
+    <!-- Modal for creating/editing staff -->
     <div id="new-user-modal" class="modal-overlay">
       <div class="modal-box">
         <h3 style="margin-bottom: 1rem">Staff Details</h3>
         <form>
+          <!-- Input fields for user info -->
           <input id="fullName" class="form-control" placeholder="Full Name" />
-          <input
-            type="email"
-            id="email"
-            class="form-control"
-            placeholder="Email"
-          />
-          <input
-            type="password"
-            id="password"
-            class="form-control"
-            placeholder="password"
-          />
+          <input type="email" id="email" class="form-control" placeholder="Email" />
+          <input type="password" id="password" class="form-control" placeholder="password" />
 
           <select id="role" class="form-control">
             <option>manager</option>
             <option>Sales Agent</option>
-            <option>admin</option>
+            <option>Director</option>
           </select>
 
           <select id="status" class="form-control">
@@ -301,9 +337,11 @@
             <option value="operations">Operations</option>
           </select>
 
+          <!-- Hidden inputs to manage create/edit actions -->
           <input type="hidden" id="action" value="create" />
           <input type="hidden" id="userID" />
 
+          <!-- Modal buttons -->
           <div class="modal-actions">
             <a href="users.html" class="btn-outline">Cancel</a>
             <button type="button" id="addUserBtn" class="btn-green">
@@ -314,11 +352,11 @@
       </div>
     </div>
 
-    <!--  Authentication handled by backend (/users/login) -->
-
+    <!-- JavaScript to handle fetching, adding, editing, and deleting users -->
     <script>
-      const API_URL = "http://localhost:3000";
+      const API_URL = "https://kgl-backend-4.onrender.com/sales";
 
+      // Get references to DOM elements
       let addUserBtn = document.querySelector("#addUserBtn");
       let fullNameElement = document.querySelector("#fullName");
       let emailElement = document.querySelector("#email");
@@ -331,6 +369,7 @@
       let userIDElement = document.querySelector("#userID");
       const Authorization = "Bearer " + localStorage.getItem("token");
 
+      // Fetch and render all users
       async function getUsers() {
         let users = await fetch(`${API_URL}/users`, {
           headers: {
@@ -340,6 +379,7 @@
         })
           .then((res) => res.json())
           .catch(() => []);
+        
         let html = "";
         users.forEach((user) => {
           html += `
@@ -357,11 +397,13 @@
                     <td>${user.department}</td>
                     <td><span class="badge badge-success">${user.status}</span></td>
                     <td style="text-align:right">
+                        <!-- Edit user button triggers modal -->
                         <a href="#new-user-modal">
                             <button onclick="editUser('${user._id}')" class="icon-btn">
                                 <span class="material-icons-outlined">edit</span>
                             </button>
                         </a>
+                        <!-- Delete user button -->
                         <button onclick="deleteUser('${user._id}')" class="icon-btn delete">
                             <span class="material-icons-outlined">delete</span>
                         </button>
@@ -369,12 +411,12 @@
                 </tr>`;
         });
         usersTableBody.innerHTML = html;
-        window.location.hash = "";
-   
+        window.location.hash = ""; // Reset hash to close modal if open
       }
 
-      getUsers();
+      getUsers(); // Initial call to fetch users
 
+      // Add or update user when save button is clicked
       addUserBtn.addEventListener("click", async () => {
         let user = {
           fullName: fullNameElement.value,
@@ -386,42 +428,43 @@
         };
 
         if (actionElement.value === "create") {
+          // Create new user
           await fetch(`${API_URL}/users`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization,
             },
-
             body: JSON.stringify(user),
           });
           window.location.href = "users.html";
         } else {
+          // Edit existing user
           await fetch(`${API_URL}/users/${userIDElement.value}`, {
             method: "PATCH",
-            // headers: { "Content-Type": "application/json" },
             headers: {
               "Content-Type": "application/json",
               Authorization,
             },
-
             body: JSON.stringify(user),
           });
           window.location.href = "users.html";
         }
       });
 
+      // Delete a user
       function deleteUser(id) {
         if (!confirm("Delete this staff member?")) return;
         fetch(`${API_URL}/users/${id}`, {
           method: "DELETE",
-           headers: {
+          headers: {
             "Content-Type": "application/json",
             Authorization,
           },
         }).then(() => (window.location.href = "users.html"));
       }
 
+      // Edit a user (populate modal with existing data)
       function editUser(id) {
         actionElement.value = "edit";
         userIDElement.value = id;

@@ -2,15 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Ensure proper scaling on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KGL Groceries Sales</title>
 
+    <!-- Inline script for authentication & role-based access -->
+    <script>
+      // Get token and user role from localStorage
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("userRole");
+
+      // Redirect to login page if token is missing
+      if (!token) {
+        window.location.href = "index.html";
+      }
+
+      // Only allow Sales Agent role to access this page
+      if (role !== "Sales Agent") {
+        alert("Access denied. Sales agent only.");
+        window.location.href = "dashboard.html";
+      }
+    </script>
+
+    <!-- Inline CSS for page styling -->
     <style>
       body {
         font-family: Arial, sans-serif;
         background: #f4f4f4;
         padding: 20px;
       }
+
+      /* Main container for content */
       .container {
         max-width: 1000px;
         margin: auto;
@@ -25,29 +47,35 @@
         cursor: pointer;
       }
 
+      /* Table styling */
       table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
       }
+
       th,
       td {
         border: 1px solid #ddd;
         padding: 8px;
         text-align: left;
       }
+
       th {
         background: #eee;
       }
 
+      /* Modal overlay */
       .modal {
-        display: none;
+        display: none; /* Hidden by default */
         position: fixed;
-        inset: 0;
+        inset: 0; /* Cover the entire viewport */
         background: rgba(0, 0, 0, 0.4);
         justify-content: center;
         align-items: center;
       }
+
+      /* Modal content box */
       .modal-box {
         background: white;
         padding: 20px;
@@ -55,11 +83,14 @@
         border-radius: 8px;
       }
 
-      input {
+      input,
+      select {
         width: 100%;
         padding: 6px;
         margin-bottom: 10px;
       }
+
+      /* Error messages in modal */
       #errorBox {
         color: red;
         margin-bottom: 10px;
@@ -68,15 +99,20 @@
   </head>
 
   <body>
+    <!-- Main container -->
     <div class="container">
       <h2>Cash Sales Management</h2>
+      <!-- Button to open modal for adding a sale -->
       <button onclick="openModal()">Add Sale</button>
 
+      <!-- Sales table -->
       <table>
         <thead>
           <tr>
             <th>Produce</th>
+            <th>Branch</th>
             <th>Tonnage</th>
+            <th>Selling Price</th>
             <th>Amount (UGX)</th>
             <th>Buyer</th>
             <th>Sales Agent</th>
@@ -85,86 +121,66 @@
             <th>Actions</th>
           </tr>
         </thead>
+        <!-- Table body will be dynamically populated -->
         <tbody id="tableBody"></tbody>
       </table>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal for adding/editing sales -->
     <div class="modal" id="modal">
       <div class="modal-box">
         <h3 id="modalTitle">Add Sale</h3>
+        <!-- Display validation or server errors -->
         <div id="errorBox"></div>
 
         <form id="form">
+          <!-- Hidden ID for editing existing sales -->
           <input type="hidden" name="id" />
 
-          <!-- Produce -->
+          <!-- Form fields -->
           <input name="produceName" placeholder="Produce Name" required />
 
-          <!-- Tonnage -->
-          <input
-            type="number"
-            name="tonnage"
-            placeholder="Tonnage"
-            min="1"
-            required
-          />
+          <select name="branch" required>
+            <option value="">Select Branch</option>
+            <option value="Maganjo">Maganjo</option>
+            <option value="Matugga">Matugga</option>
+          </select>
 
-          <!-- Amount -->
-          <input
-            type="number"
-            name="amountPaid"
-            placeholder="Amount Paid (UGX)"
-            min="10000"
-            required
-          />
+          <input type="number" name="tonnage" placeholder="Tonnage" min="1" required />
+          <input type="number" name="sellingPrice" placeholder="Selling Price (UGX)" min="1000" required />
+          <input type="number" name="amountPaid" placeholder="Amount Paid (UGX)" min="10000" required />
 
-          <!-- Buyer -->
-          <input
-            name="buyerName"
-            placeholder="Buyer Name"
-            pattern="^[a-zA-Z0-9 ]{2,}$"
-            title="Minimum 2 characters, letters and numbers only"
-            required
-          />
+          <input name="buyerName" placeholder="Buyer Name" pattern="^[a-zA-Z0-9 ]{2,}$" title="Minimum 2 characters, letters and numbers only" required />
+          <input name="salesAgentName" placeholder="Sales Agent Name" pattern="^[a-zA-Z0-9 ]{2,}$" title="Minimum 2 characters, letters and numbers only" required />
 
-          <!-- Sales Agent -->
-          <input
-            name="salesAgentName"
-            placeholder="Sales Agent Name"
-            pattern="^[a-zA-Z0-9 ]{2,}$"
-            title="Minimum 2 characters, letters and numbers only"
-            required
-          />
-
-          <!-- Date -->
           <input type="date" name="date" required />
-
-          <!-- Time -->
           <input type="time" name="time" required />
 
+          <!-- Modal action buttons -->
           <button type="submit">Save</button>
           <button type="button" onclick="closeModal()">Cancel</button>
         </form>
       </div>
     </div>
 
-    <script>
-      const API = "https://kgl-backend-4.onrender.com/sales";
+    <!-- JavaScript to handle CRUD operations -->
+    <script>https://kgl-backend-4.onrender.com
+      const API = "/sales"; // API endpoint
       const tableBody = document.getElementById("tableBody");
       const modal = document.getElementById("modal");
       const form = document.getElementById("form");
       const errorBox = document.getElementById("errorBox");
       const modalTitle = document.getElementById("modalTitle");
-      const Authorization = "Bearer " + localStorage.getItem("token");
+      const Authorization = "Bearer " + localStorage.getItem("token"); // Auth header
 
-      // Open modal
+      // Open modal for adding or editing a sale
       function openModal(data = null) {
-        modal.style.display = "flex";
-        form.reset();
-        errorBox.innerText = "";
+        modal.style.display = "flex"; // Show modal
+        form.reset(); // Reset form fields
+        errorBox.innerText = ""; // Clear previous errors
 
         if (data) {
+          // Editing an existing sale
           modalTitle.innerText = "Edit Sale";
           form.id.value = data._id;
           Object.keys(data).forEach((k) => {
@@ -180,89 +196,80 @@
         modal.style.display = "none";
       }
 
-      // Submit form
+      // Handle form submission (create or update)
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
         const data = Object.fromEntries(new FormData(form).entries());
         const id = data.id;
-        delete data.id;
+        delete data.id; // Remove id from payload for create
 
         try {
           const res = await fetch(id ? `${API}/${id}` : API, {
-            method: id ? "PUT" : "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-              Authorization,
-            },
-
+            method: id ? "PUT" : "POST", // PUT for update, POST for create
+            headers: { "Content-Type": "application/json", Authorization },
             body: JSON.stringify(data),
           });
 
           const result = await res.json();
           if (!res.ok) {
-            errorBox.innerText = result.message;
+            // Display error messages if server returns an error
+            errorBox.innerText = Array.isArray(result.message)
+              ? result.message.join(", ")
+              : result.message;
             return;
           }
 
           closeModal();
-          loadData();
+          loadData(); // Refresh table
         } catch (err) {
           errorBox.innerText = "Server error";
         }
       });
 
-      // Load sales
+      // Load sales data from API and populate table
       async function loadData() {
-        const res = await fetch(API, {
-          headers: { Authorization },
-        });
+        const res = await fetch(API, { headers: { Authorization } });
         const result = await res.json();
-
         tableBody.innerHTML = "";
-
         result.data.forEach((s) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-      <td>${s.produceName}</td>
-      <td>${s.tonnage}</td>
-      <td>${s.amountPaid}</td>
-      <td>${s.buyerName}</td>
-      <td>${s.salesAgentName}</td>
-      <td>${s.date}</td>
-      <td>${s.time}</td>
-      <td>
-        <button onclick='editSale("${s._id}")'>Edit</button>
-        <button onclick='deleteSale("${s._id}")'>Delete</button>
-      </td>
-    `;
+            <td>${s.produceName}</td>
+            <td>${s.branch}</td>
+            <td>${s.tonnage}</td>
+             <td>${s.sellingPrice}</td>
+            <td>${s.amountPaid}</td>
+            <td>${s.buyerName}</td>
+            <td>${s.salesAgentName}</td>
+            <td>${s.date}</td>
+            <td>${s.time}</td>
+            <td>
+              <button onclick='editSale("${s._id}")'>Edit</button>
+              <button onclick='deleteSale("${s._id}")'>Delete</button>
+            </td>
+          `;
           tableBody.appendChild(tr);
         });
       }
 
-      // Edit
+      // Fetch a single sale and open modal for editing
       async function editSale(id) {
-        const res = await fetch(`${API}/${id}`, {
-          headers: { Authorization },
-        });
+        const res = await fetch(`${API}/${id}`, { headers: { Authorization } });
         const result = await res.json();
         openModal(result.data);
       }
-     
-      // Delete
+
+      // Delete a sale after confirmation
       async function deleteSale(id) {
         if (!confirm("Delete this sale?")) return;
         await fetch(`${API}/${id}`, {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization,
-          },
+          headers: { "Content-Type": "application/json", Authorization },
         });
-        loadData();
+        loadData(); // Refresh table
       }
 
+      // Initial load of sales data
       loadData();
     </script>
   </body>

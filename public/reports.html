@@ -2,11 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>KGL Groceries – Reports & Analytics</title>
+    <title>KGL Groceries Reports & Analytics</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ================= CHART.JS ================= -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- ================= AUTHENTICATION CHECK ================= -->
+    <script>
+      // Get user token and role from local storage
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("userRole");
+
+      // Block access if no token
+      if (!token) {
+        window.location.href = "index.html";
+      }
+
+      // Restrict access to Directors only
+      if (role !== "Director") {
+        alert("Access denied. Directors only.");
+        window.location.href = "dashboard.html";
+      }
+    </script>
+
     <style>
+      /* ================= GLOBAL STYLES ================= */
       * {
         box-sizing: border-box;
         font-family: "Segoe UI", Tahoma, sans-serif;
@@ -15,6 +36,8 @@
         margin: 0;
         background: #f5f7fa;
       }
+
+      /* ================= HEADER ================= */
       header {
         background: #fff;
         padding: 15px 25px;
@@ -26,11 +49,15 @@
       header h2 {
         margin: 0;
       }
+
+      /* ================= CONTAINER ================= */
       .container {
         padding: 25px;
         max-width: 1200px;
         margin: auto;
       }
+
+      /* ================= SUMMARY CARDS ================= */
       .cards {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -49,12 +76,16 @@
       .card h2 {
         margin: 10px 0 0;
       }
+
+      /* ================= CHARTS ================= */
       .charts {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 20px;
         margin-bottom: 30px;
       }
+
+      /* ================= TABLES ================= */
       table {
         width: 100%;
         border-collapse: collapse;
@@ -63,8 +94,7 @@
         overflow: hidden;
         margin-bottom: 30px;
       }
-      th,
-      td {
+      th, td {
         padding: 12px;
         border-bottom: 1px solid #eee;
         text-align: left;
@@ -88,6 +118,7 @@
         margin-bottom: 20px;
         font-weight: 600;
       }
+
       @media (max-width: 900px) {
         .cards,
         .charts {
@@ -98,6 +129,7 @@
   </head>
 
   <body>
+    <!-- ================= HEADER ================= -->
     <header>
       <div>
         <h2>KGL Groceries LTD</h2>
@@ -110,43 +142,39 @@
     <div class="container">
       <h3>Sales Reports & Profit Analytics</h3>
 
-      <!-- SUMMARY CARDS -->
+      <!-- ================= SUMMARY CARDS ================= -->
       <div class="cards">
         <div class="card">
           <small>Total Revenue</small>
           <h2 id="totalRevenue">UGX 0</h2>
         </div>
-
         <div class="card">
           <small>Regular Sales</small>
           <h2 id="regularSales">UGX 0</h2>
         </div>
-
         <div class="card">
           <small>Credit Sales</small>
           <h2 id="creditSales">UGX 0</h2>
         </div>
-
         <div class="card">
           <small>Gross Profit</small>
           <h2 id="grossProfit">UGX 0</h2>
         </div>
       </div>
 
-      <!-- CHARTS -->
+      <!-- ================= CHARTS ================= -->
       <div class="charts">
         <div class="card">
           <h4>Revenue Distribution</h4>
           <canvas id="revenueChart"></canvas>
         </div>
-
         <div class="card">
           <h4>Profit by Produce</h4>
           <canvas id="profitChart"></canvas>
         </div>
       </div>
 
-      <!-- SALES TABLE -->
+      <!-- ================= REGULAR SALES TABLE ================= -->
       <h4>Regular Sales History</h4>
       <table>
         <thead>
@@ -162,9 +190,10 @@
         <tbody id="salesTable"></tbody>
       </table>
 
-      <!-- STOCK -->
+      <!-- ================= STOCK ALERT ================= -->
       <div class="alert" id="stockAlert" style="display: none"></div>
 
+      <!-- ================= STOCK TABLE ================= -->
       <h4>Stock Overview</h4>
       <table>
         <thead>
@@ -181,25 +210,29 @@
       </table>
     </div>
 
+    <!-- ================= SCRIPT ================= -->
     <script>
-      const API_SALES = "http://localhost:3000/sales";
-      const API_CREDIT = "http://localhost:3000/creditsales";
-      const API_PROC = "http://localhost:3000/procurement";
+      // ================= API ENDPOINTS =================
+      const API_SALES = "https://kgl-backend-4.onrender.com/sales";
+      const API_CREDIT = "https://kgl-backend-4.onrender.com/creditsales";
+      const API_PROC = "https://kgl-backend-4.onrender.com/procurement";
       const Authorization = "Bearer " + localStorage.getItem("token");
 
+      // ================= DOM ELEMENTS =================
       const totalRevenueEl = document.getElementById("totalRevenue");
       const regularSalesEl = document.getElementById("regularSales");
       const creditSalesEl = document.getElementById("creditSales");
       const grossProfitEl = document.getElementById("grossProfit");
-
       const salesTable = document.getElementById("salesTable");
       const stockTable = document.getElementById("stockTable");
       const stockAlert = document.getElementById("stockAlert");
 
       let revenueChart, profitChart;
 
+      // ================= LOAD REPORT DATA =================
       async function loadReport() {
         try {
+          // Fetch sales, credit sales, and procurement data concurrently
           const [salesRes, creditRes, procRes] = await Promise.all([
             fetch(API_SALES, { headers: { Authorization } }),
             fetch(API_CREDIT, { headers: { Authorization } }),
@@ -210,15 +243,14 @@
           const credits = (await creditRes.json()).data || [];
           const procurements = (await procRes.json()).data || [];
 
-          // ================== REVENUE ==================
-
+          // ================= CALCULATE REVENUE =================
           const regularTotal = sales.reduce(
             (sum, s) => sum + Number(s.amountPaid || 0),
-            0,
+            0
           );
           const creditTotal = credits.reduce(
             (sum, s) => sum + Number(s.amountDue || 0),
-            0,
+            0
           );
           const totalRevenue = regularTotal + creditTotal;
 
@@ -226,21 +258,18 @@
           creditSalesEl.innerText = "UGX " + creditTotal.toLocaleString();
           totalRevenueEl.innerText = "UGX " + totalRevenue.toLocaleString();
 
-          // ================== PROCUREMENT COST ==================
-
+          // ================= CALCULATE PROCUREMENT COST =================
           const totalCost = procurements.reduce(
             (sum, p) => sum + Number(p.tonnage) * Number(p.cost),
-            0,
+            0
           );
 
-          // ================== GROSS PROFIT ==================
-
+          // ================= GROSS PROFIT =================
           const grossProfit = totalRevenue - totalCost;
           grossProfitEl.innerText = "UGX " + grossProfit.toLocaleString();
           grossProfitEl.style.color = grossProfit >= 0 ? "#27ae60" : "#c0392b";
 
-          // ================== SALES TABLE ==================
-
+          // ================= POPULATE SALES TABLE =================
           salesTable.innerHTML = "";
           sales.forEach((s) => {
             salesTable.innerHTML += `
@@ -255,8 +284,7 @@
 `;
           });
 
-          // ================== STOCK CALCULATION ==================
-
+          // ================= CALCULATE STOCK =================
           stockTable.innerHTML = "";
           let outOfStockCount = 0;
 
@@ -283,14 +311,11 @@
 
           if (outOfStockCount > 0) {
             stockAlert.style.display = "block";
-            stockAlert.innerText =
-              "⚠ " + outOfStockCount + " item(s) out of stock";
+            stockAlert.innerText = "⚠ " + outOfStockCount + " item(s) out of stock";
           }
 
-          // ================== REVENUE CHART ==================
-
+          // ================= REVENUE CHART =================
           if (revenueChart) revenueChart.destroy();
-
           revenueChart = new Chart(document.getElementById("revenueChart"), {
             type: "pie",
             data: {
@@ -304,22 +329,17 @@
             },
           });
 
-          // ================== PROFIT BY PRODUCE ==================
-
+          // ================= PROFIT BY PRODUCE =================
           const profitMap = {};
-
           procurements.forEach((p) => {
             const revenue = sales
               .filter((s) => s.produceName === p.nameOfProduce)
               .reduce((sum, s) => sum + Number(s.amountPaid || 0), 0);
-
             const cost = Number(p.tonnage) * Number(p.cost);
-
             profitMap[p.nameOfProduce] = revenue - cost;
           });
 
           if (profitChart) profitChart.destroy();
-
           profitChart = new Chart(document.getElementById("profitChart"), {
             type: "bar",
             data: {
@@ -334,7 +354,7 @@
             },
           });
         } catch (err) {
-          console.log(err);
+          console.error("Error loading report data:", err);
         }
       }
 
