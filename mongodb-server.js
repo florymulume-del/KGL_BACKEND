@@ -10,7 +10,7 @@ const mongoose = require("mongoose");
 
 // MongoDB URI
 // For production, store this in a .env file instead of hardcoding
-const URI = process.env.MONGODB_URI || "mongodb://localhost:27017/karibu_groceries_db";
+const URI = process.env.MONGODB_URI || "mongodb+srv://<db_username>:<db_password>@karibudts.ymc4apk.mongodb.net/?appName=KaribuDts";
 
 // Connect to MongoDB
 mongoose.connect(URI, {

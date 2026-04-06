@@ -279,3 +279,6 @@ loadReport();
 
 </body>
 </html>
+
+
+mongodb+srv://<db_username>:<db_password>@karibudts.ymc4apk.mongodb.net/?appName=KaribuDts
